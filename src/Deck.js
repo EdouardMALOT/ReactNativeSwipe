@@ -52,6 +52,12 @@ class Deck extends Component {
     this.position = position;
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.data !== this.props.data) {
+      this.setState({ index: 0 });
+    }
+  }
+
   componentWillUpdate() {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
       UIManager.setLayoutAnimationEnabledExperimental(true);
