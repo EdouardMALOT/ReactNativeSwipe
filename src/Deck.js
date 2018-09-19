@@ -8,6 +8,8 @@ import {
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = (SCREEN_WIDTH / 3);
+
+const SWIPE_OUT_OPACITY = 0.3;
 const SWIPE_OUT_DURATION = 250;
 
 class Deck extends Component {
@@ -53,9 +55,15 @@ class Deck extends Component {
         outputRange: ['-50deg', '0deg', '50deg']
     });
 
+    const opacity = position.x.interpolate({
+      inputRange: [-(SCREEN_WIDTH / 2), 0, (SCREEN_WIDTH / 2)],
+      outputRange: [SWIPE_OUT_OPACITY, 1.0, SWIPE_OUT_OPACITY]
+    });
+
     return ({
       ...position.getLayout(),
-      transform: [{ rotate }]
+      transform: [{ rotate }],
+      opacity
     });
   }
 
@@ -88,7 +96,7 @@ class Deck extends Component {
 
       if (i < index) return null;
 
-      if (i === this.state.index) {
+      if (i === index) {
         return (
           <Animated.View 
           key={item.id} 
