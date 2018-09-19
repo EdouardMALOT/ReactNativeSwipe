@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { 
+  StyleSheet,
   View,
+  Text,
   Animated,
   PanResponder,
   Dimensions
@@ -9,8 +11,8 @@ import {
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = (SCREEN_WIDTH / 3);
 
-const SWIPE_OUT_OPACITY = 0.3;
-const SWIPE_OUT_DURATION = 250;
+const SWIPE_OUT_OPACITY = 0.5;
+const SWIPE_OUT_DURATION = 150;
 
 class Deck extends Component {
 
@@ -18,6 +20,7 @@ class Deck extends Component {
   static defaultProps = {
     onSwipeRight: (item) => { console.log(item); },
     onSwipeLeft: (item) => { console.log(item); },
+    renderNoMoreCards: () => { return <Text>No more cards</Text>; }
   }
 
   constructor(props) {
@@ -91,29 +94,34 @@ class Deck extends Component {
   }
 
   renderCards() {
+    if (this.state.index >= this.props.data.length) {
+      return this.props.renderNoMoreCards();
+    }
+
     return this.props.data.map((item, i) => {
-      const { index } = this.state;
+      if (i < this.state.index) { return null; }
 
-      if (i < index) return null;
-
-      if (i === index) {
+      if (i === this.state.index) {
         return (
-          <Animated.View 
-          key={item.id} 
-          style={this.getAnimatedStyle()}
-          {...this.state.panResponder.panHandlers}
+          <Animated.View
+            key={item.id}
+            style={[this.getAnimatedStyle(), styles.cardStyle, { zIndex: 99 }]}
+            {...this.state.panResponder.panHandlers}
           >
-           {this.props.renderCard(item)}
-          </Animated.View> 
+            {this.props.renderCard(item)}
+          </Animated.View>
         );
       }
 
       return (
-        <View key={item.id} >
-         {this.props.renderCard(item)}
-        </View> 
+        <Animated.View
+          key={item.id}
+          style={[styles.cardStyle, { top: 10 * (i - this.state.index), zIndex: 5 }]}
+        >
+          {this.props.renderCard(item)}
+        </Animated.View>
       );
-    });
+    }).reverse();
   }
 
   render() {
@@ -124,5 +132,12 @@ class Deck extends Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  cardStyle: {
+    position: 'absolute',
+    width: SCREEN_WIDTH
+  },
+});
 
 export default Deck;
