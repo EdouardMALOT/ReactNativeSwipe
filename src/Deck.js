@@ -7,8 +7,8 @@ import {
 } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-//const SCREEN_HEIGHT = Dimensions.get('window').height;
-
+const SWIPE_THRESHOLD = (SCREEN_WIDTH / 3);
+const SWIPE_OUT_DURATION = 250;
 
 class Deck extends Component {
 
@@ -23,9 +23,15 @@ class Deck extends Component {
        //Get gesture
        position.setValue({ x: gesture.dx, y: gesture.dy });
       },
-      onPanResponderRelease: () => { 
-        //Reset position
-        Animated.spring(this.state.position, { toValue: { x: 0, y: 0 } }).start();
+      onPanResponderRelease: (event, gesture) => { 
+        if (gesture.dx > SWIPE_THRESHOLD) {
+          this.SwipeRight();
+        } else if (gesture.dx < -SWIPE_THRESHOLD) {
+          this.SwipeLeft();
+        } else {
+          //Reset position
+          Animated.spring(this.state.position, { toValue: { x: 0, y: 0 } }).start();
+        }
       }
     });
 
@@ -44,6 +50,20 @@ class Deck extends Component {
       ...position.getLayout(),
       transform: [{ rotate }]
     });
+  }
+
+  SwipeRight() {
+      Animated.timing(this.state.position, { 
+        toValue: { x: SCREEN_WIDTH, y: 0 },
+        timing: SWIPE_OUT_DURATION
+      }).start();
+  }
+
+  SwipeLeft() {
+    Animated.timing(this.state.position, { 
+      toValue: { x: -SCREEN_WIDTH, y: 0 },
+      timing: SWIPE_OUT_DURATION
+    }).start();
   }
 
   renderCards() {
