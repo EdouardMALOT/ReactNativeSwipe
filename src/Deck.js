@@ -36,16 +36,17 @@ class Deck extends Component {
           this.ForeSwipe('left');
         } else {
           //Reset position
-          Animated.spring(this.state.position, { toValue: { x: 0, y: 0 } }).start();
+          Animated.spring(this.position, { toValue: { x: 0, y: 0 } }).start();
         }
       }
     });
 
-    this.state = { panResponder, position, index: 0 };
+    this.state = { panResponder, index: 0 };
+    this.position = position;
   }
 
   getAnimatedStyle() {
-    const { position } = this.state;
+    const { position } = this;
 
     const rotate = position.x.interpolate({
         inputRange: [-(SCREEN_WIDTH / 2), 0, (SCREEN_WIDTH / 2)],
@@ -61,7 +62,7 @@ class Deck extends Component {
   ForeSwipe(direction) {
       const x = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
 
-      Animated.timing(this.state.position, { 
+      Animated.timing(this.position, { 
         toValue: { x, y: 0 },
         timing: SWIPE_OUT_DURATION
       }).start(() => this.OnSwipeComplete(direction));
@@ -76,11 +77,18 @@ class Deck extends Component {
     } else {
       onSwipeLeft(item);
     }
+
+    this.position.setValue({ x: 0, Y: 0 });
+    this.setState({ index: this.state.index + 1 }); 
   }
 
   renderCards() {
     return this.props.data.map((item, i) => {
-      if (i === 0) {
+      const { index } = this.state;
+
+      if (i < index) return null;
+
+      if (i === this.state.index) {
         return (
           <Animated.View 
           key={item.id} 
